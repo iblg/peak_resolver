@@ -1,6 +1,6 @@
 import pandas as pd
 import xarray as xr
-from process_chromeleon.process_chromeleon import *
+from peak_resolver.process_chromeleon import *
 import os
 import re
 import numpy as np
