@@ -1,6 +1,6 @@
 import pandas as pd
 import xarray as xr
-from process_chromeleon.process_chromeleon import *
+from peak_resolver.process_chromeleon import *
 import os
 import re
 import numpy as np
@@ -53,9 +53,8 @@ def read_cal_curve_to_list(top_path):
         data_list.append(files)
     return data_list, fpath_list
 
-def read_dataset_to_list(top_path):
-    tgrid = np.linspace(0.15, 19.85, 5997)
-
+def read_dataset_to_list(top_path, tgrid = np.linspace(0.15, 19.85, 5997)):
+    print('Re-gridding using tgrid {}'.format(tgrid))
     os.chdir(top_path)
     cwd = os.getcwd()
     exptl_dirs = os.listdir()[1:]
@@ -71,7 +70,11 @@ def read_dataset_to_list(top_path):
             for file in files:
                 filename = cwd + '/' + dir + '/' + run_dir + '/' + file
                 data = process_file(filename, tmin=0, tmax=20)
+                data['tgrid'] = tgrid
                 data = interpolate_time(data, tgrid)
+                data = data.drop(columns=['s', 'ds', 'd2s','t'])
+                data = data.rename(columns={'s_interp': 's', 'ds_interp': 'ds', 'd2s_interp': 'd2s', 'tgrid':'t'})
+                
                 data['side'] = file[0]
                 data['exp_time'] = float(file[1])
 
@@ -82,9 +85,7 @@ def read_dataset_to_list(top_path):
 
                 for chem in chems:
                     data[chem] = comp[chem].iloc[0]
-                data = data.drop(columns=['s', 'ds', 'd2s'])
-                data = data.rename(columns={'s_interp': 's', 'ds_interp': 'ds', 'd2s_interp': 'd2s'})
-                data['tgrid'] = tgrid
+
                 data_list.append(data)
     return data_list
 
