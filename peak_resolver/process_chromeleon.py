@@ -1,8 +1,10 @@
 import pandas as pd
+import numpy as np
 from matplotlib import colormaps
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
-
+import pathlib
+from scipy.interpolate import griddata
 
 def process_file(filepath, tmin=6.5, tmax=9):
     with open(filepath, 'r') as infile:
@@ -16,6 +18,29 @@ def process_file(filepath, tmin=6.5, tmax=9):
     data['ds'] = data['s'].diff()
     data['d2s'] = data['ds'].diff()
     
+    data = data.where(data['t'] > tmin).where(data['t'] < tmax).dropna()
+    
+    return data
+
+def process_chromeleon_file(filepath: pathlib.PosixPath, tmin: float, tmax: float, tgrid:np.array=None):
+    '''
+    '''
+    with filepath.open() as f: 
+        lines = f.readlines()
+   
+    lines = [line.strip().split('\t') for line in lines]
+    lines = lines[44:-1]
+    data = pd.DataFrame(lines, columns = ['t', 'step', 's'], dtype='float')
+    data = data.drop(columns='step')
+
+    if tgrid is None:
+        tgrid = np.linspace(tmin, tmax, data.shape[0])
+
+    data['s'] = griddata(data['t'], data['s'], tgrid)
+    data['t'] = tgrid
+        
+    data['ds'] = data['s'].diff()
+    data['d2s'] = data['ds'].diff()
     data = data.where(data['t'] > tmin).where(data['t'] < tmax).dropna()
     
     return data
