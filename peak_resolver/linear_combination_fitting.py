@@ -56,3 +56,9 @@ def lin_combination_fitting(target: np.array, vectors: tuple, initial_guess=None
         "p": result.x, #return parameters
         "r": result.fun, # return residuals
     }
+
+def calculate_fit(params: list, vecs: tuple):
+    fit = np.zeros_like(vecs[0])
+    for p, v in zip(params, vecs):
+        fit += p * v
+    return fit
