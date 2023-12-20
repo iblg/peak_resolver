@@ -8,18 +8,19 @@ import numpy as np
 def flatten(matrix):
     return [item for row in matrix for item in row]
 
-def get_cal_curve_dataset(data_list, fpath_list):
+def get_cal_curve_dataset(data_list, fpath_list, tgrid = np.linspace(0.15, 19.85, 5997)):
     data_list = flatten(data_list)
     fpath_list = flatten(fpath_list)
     conc = {'1':0.05, '2':0.1, '3':0.2, '4':0.3, '5':0.4, '6':0.4}
     chems = ['A', 'P', 'B', 'V', 'C']
 
     for data, name in zip(data_list, fpath_list):
+        data = interpolate_time(data, tgrid)
         for c in chems:
             data[c] = 0
         
         data[name[0]] = float(conc[name[1]])
-    
+
     
     df = data_list[0]
     for i in data_list[1:]:
@@ -30,16 +31,10 @@ def get_cal_curve_dataset(data_list, fpath_list):
     df = df.set_index(indices)
     df = df.sort_values(['A', 'P', 'B', 'V', 'C'])
 
-    # for i in df.iterrows():
-    #     print(i)
-    # # data_list = [data.set_index(indices) for data in data_list]
-    # data_list = [d.to_xarray() for d in data_list]
-    idx = df.index()
-    df = df.drop
     ds = df.to_xarray()
     return ds
 
-def read_cal_curve_to_list(top_path):
+def read_cal_curve_to_list(top_path, tgrid=np.linspace(0.15, 19.85, 5997)):
     os.chdir(top_path)
     cwd = os.getcwd()
     exp_dirs = os.listdir()[1:]
@@ -49,6 +44,7 @@ def read_cal_curve_to_list(top_path):
         os.chdir(os.path.join(top_path, exp_dir))
         file_paths = [f for f in os.listdir() if '.txt' in f]
         files = [process_file(f) for f in os.listdir() if '.txt' in f]
+        # files = [interpolate_time(data, tgrid) for data in files]
         fpath_list.append(file_paths)
         data_list.append(files)
     return data_list, fpath_list
@@ -69,11 +65,10 @@ def read_dataset_to_list(top_path, tgrid = np.linspace(0.15, 19.85, 5997)):
             first = 0
             for file in files:
                 filename = cwd + '/' + dir + '/' + run_dir + '/' + file
-                data = process_file(filename, tmin=0, tmax=20)
-                data['tgrid'] = tgrid
+                # data = process_file(filename, tmin=0, tmax=20)
                 data = interpolate_time(data, tgrid)
-                data = data.drop(columns=['s', 'ds', 'd2s','t'])
-                data = data.rename(columns={'s_interp': 's', 'ds_interp': 'ds', 'd2s_interp': 'd2s', 'tgrid':'t'})
+                # data = data.drop(columns=['s', 'ds', 'd2s','t'])
+                # data = data.rename(columns={'s_interp': 's', 'ds_interp': 'ds', 'd2s_interp': 'd2s', 'tgrid':'t'})
                 
                 data['side'] = file[0]
                 data['exp_time'] = float(file[1])
@@ -120,8 +115,12 @@ from scipy.signal import resample
 
 
 def interpolate_time(data, tgrid):
+    data['tgrid'] = tgrid
+
     for i in ['s', 'ds', 'd2s']:
         data[i + '_interp'] = griddata(np.array(data['t']), np.array(data[i]), tgrid)
+    data = data.drop(columns=['s', 'ds', 'd2s','t'])
+    data = data.rename(columns={'s_interp': 's', 'ds_interp': 'ds', 'd2s_interp': 'd2s', 'tgrid':'t'})
     return data
 
 
