@@ -35,9 +35,13 @@ def process_chromeleon_file(filepath: pathlib.PosixPath, tmin: float, tmax: floa
 
     if tgrid is None:
         tgrid = np.linspace(tmin, tmax, data.shape[0])
+        print('No tgrid passed. Reverting to {}'.format(tgrid))
+
     
     df = pd.DataFrame(tgrid, columns=['t'])
+    print(df)
     df['s'] = griddata(data['t'], data['s'], tgrid)
+    print(df)
     df['ds'] = df['s'].diff()
     df['d2s'] = df['ds'].diff()
     df = df.where(df['t'] > tmin).where(df['t'] < tmax).dropna()
