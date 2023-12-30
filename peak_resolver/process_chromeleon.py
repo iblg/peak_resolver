@@ -36,22 +36,14 @@ def process_chromeleon_file(filepath: pathlib.PosixPath, tmin: float, tmax: floa
     if tgrid is None:
         tgrid = np.linspace(tmin, tmax, data.shape[0])
     
-    # data['t'] = tgrid
-
-    data2 = pd.DataFrame(tgrid, columns=['t'])
-    data2['s'] = griddata(data['t'], data['s'], tgrid)
-    data2['ds'] = data2['s'].diff()
-    data2['d2s'] = data2['ds'].diff()
-    data2 = data2.where(data2['t'] > tmin).where(data2['t'] < tmax).dropna()
-    return data2
+    df = pd.DataFrame(tgrid, columns=['t'])
+    df['s'] = griddata(data['t'], data['s'], tgrid)
+    df['ds'] = df['s'].diff()
+    df['d2s'] = df['ds'].diff()
+    df = df.where(df['t'] > tmin).where(df['t'] < tmax).dropna()
+    return df
     
-    # data['s'] = griddata(data['t'], data['s'], tgrid)
-    # data['ds'] = data['s'].diff()
-    # data['d2s'] = data['ds'].diff()
-    # data = data.where(data['t'] > tmin).where(data['t'] < tmax).dropna()
     
-    # return data
-
 def process_conc_series(prefix, postfix, numbers = None, tmin=6.5, tmax=9):
     if numbers is None:
         numbers = [1,2,3,4,5,6]
