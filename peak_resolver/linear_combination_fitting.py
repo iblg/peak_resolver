@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
+
 def residuals(params, C, vectors):
     """
     Calculates the residuals for given parameters and a tuple of vectors.

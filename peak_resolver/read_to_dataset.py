@@ -65,7 +65,7 @@ def read_dataset_to_list(top_path, tgrid = np.linspace(0.15, 19.85, 5997)):
             first = 0
             for file in files:
                 filename = cwd + '/' + dir + '/' + run_dir + '/' + file
-                # data = process_file(filename, tmin=0, tmax=20)
+                data = process_file(filename, tmin=0, tmax=20)
                 data = interpolate_time(data, tgrid)
                 # data = data.drop(columns=['s', 'ds', 'd2s','t'])
                 # data = data.rename(columns={'s_interp': 's', 'ds_interp': 'ds', 'd2s_interp': 'd2s', 'tgrid':'t'})
