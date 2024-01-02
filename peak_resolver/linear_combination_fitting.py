@@ -20,6 +20,8 @@ def residuals(params, C, vectors):
 
     fit = np.zeros_like(C)
     for param, vector in zip(params, vectors):
+        # print(param)
+        # print(vector.shape)
         fit += param * vector
 
     return np.linalg.norm(C_new - fit)
@@ -51,7 +53,11 @@ def lin_combination_fitting(target: np.array, vectors: tuple, initial_guess=None
         initial_guess = [0.5] * num_vectors  # Provide initial guesses for each parameter
     else:
         pass
+
+    # try:
     result = minimize(residuals, initial_guess, args=(target, vectors), bounds=bounds, method=method)
+    # except OptimizeWarning as ow:
+        # pass
 
     return {
         "p": result.x, #return parameters
