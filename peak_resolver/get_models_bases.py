@@ -2,6 +2,17 @@ from pathlib import Path
 import pickle
 import xarray as xr
 
+def set_bounds(composition):
+    bounds = []
+    for i in range(len(composition)):
+        if composition[i] < 10**-5:
+            # bounds.append([0,10**-5])
+            bounds.append([0,0])
+        else:
+            bounds.append([0,2])
+
+    return bounds
+    
 def get_models(root_dir:str, acids:list):
     mods = {}
     p = Path(root_dir).resolve()
@@ -38,7 +49,7 @@ def get_basis_functions(fp:str,
         for acid in unwanted:
             x = x.sel({acid:0})
         x = x.dropna(dim='t', how='all')[order]
-        print('\n\n\n {} dataset:'.format(coord))
+        # print('\n\n\n {} dataset:'.format(coord))
         # print(x)
 
         basis_funcs.append(x)
